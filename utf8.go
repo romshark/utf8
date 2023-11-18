@@ -479,13 +479,12 @@ func Valid(p []byte) bool {
 		// Fast path for single-byte inputs
 		return p[0] < RuneSelf
 	}
+	// This optimization avoids the need to recompute the capacity
+	// when generating code for p[8:], bringing it to parity with
+	// ValidString, which was 20% faster on long ASCII strings.
+	p = p[:len(p):len(p)]
 MAIN_LOOP:
 	for {
-		// This optimization avoids the need to recompute the capacity
-		// when generating code for p[8:], bringing it to parity with
-		// ValidString, which was 20% faster on long ASCII strings.
-		p = p[:len(p):len(p)]
-
 		// Fast path. Check for and skip 16 bytes of ASCII characters per iteration.
 		for len(p) > 15 {
 			// Combining two 32 bit loads allows the same code to be used
