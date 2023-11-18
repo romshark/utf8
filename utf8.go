@@ -475,6 +475,10 @@ func RuneStart(b byte) bool { return b&0xC0 != 0x80 }
 
 // Valid reports whether p consists entirely of valid UTF-8-encoded runes.
 func Valid(p []byte) bool {
+	if len(p) == 1 {
+		// Fast path for single-byte inputs
+		return p[0] < RuneSelf
+	}
 MAIN_LOOP:
 	for {
 		// This optimization avoids the need to recompute the capacity
@@ -483,19 +487,16 @@ MAIN_LOOP:
 		p = p[:len(p):len(p)]
 
 		// Fast path. Check for and skip 16 bytes of ASCII characters per iteration.
-		for len(p) >= 16 {
+		for len(p) > 15 {
 			// Combining two 32 bit loads allows the same code to be used
 			// for 32 and 64 bit platforms.
 			// The compiler can generate a 32bit load for first32 and second32
 			// on many platforms. See test/codegen/memcombine.go.
 			first32 := uint32(p[0]) | uint32(p[1])<<8 | uint32(p[2])<<16 | uint32(p[3])<<24
 			second32 := uint32(p[4]) | uint32(p[5])<<8 | uint32(p[6])<<16 | uint32(p[7])<<24
-			if (first32|second32)&0x80808080 != 0 {
-				break // Found a non ASCII byte (>= RuneSelf).
-			}
 			third32 := uint32(p[8]) | uint32(p[9])<<8 | uint32(p[10])<<16 | uint32(p[11])<<24
 			fourth32 := uint32(p[12]) | uint32(p[13])<<8 | uint32(p[14])<<16 | uint32(p[15])<<24
-			if (third32|fourth32)&0x80808080 != 0 {
+			if (first32|second32)&0x80808080 != 0 || (third32|fourth32)&0x80808080 != 0 {
 				break // Found a non ASCII byte (>= RuneSelf).
 			}
 			p = p[16:]
