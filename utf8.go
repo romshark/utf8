@@ -493,9 +493,13 @@ MAIN_LOOP:
 			// on many platforms. See test/codegen/memcombine.go.
 			first32 := uint32(p[0]) | uint32(p[1])<<8 | uint32(p[2])<<16 | uint32(p[3])<<24
 			second32 := uint32(p[4]) | uint32(p[5])<<8 | uint32(p[6])<<16 | uint32(p[7])<<24
-			third32 := uint32(p[8]) | uint32(p[9])<<8 | uint32(p[10])<<16 | uint32(p[11])<<24
-			fourth32 := uint32(p[12]) | uint32(p[13])<<8 | uint32(p[14])<<16 | uint32(p[15])<<24
-			if (first32|second32)&0x80808080 != 0 || (third32|fourth32)&0x80808080 != 0 {
+			if (first32|second32)&0x80808080 != 0 {
+				break // Found a non ASCII byte (>= RuneSelf).
+			}
+			first32 = uint32(p[8]) | uint32(p[9])<<8 | uint32(p[10])<<16 | uint32(p[11])<<24
+			second32 = uint32(p[12]) | uint32(p[13])<<8 | uint32(p[14])<<16 | uint32(p[15])<<24
+			if (first32|second32)&0x80808080 != 0 {
+				p = p[8:]
 				break // Found a non ASCII byte (>= RuneSelf).
 			}
 			p = p[16:]
