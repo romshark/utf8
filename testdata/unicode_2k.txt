@@ -1,0 +1,21 @@
+日本語のサンプルテキストです。これはUTF-8エンコーディングで書かれていますので、日本語の文字が正しく表示されるはずです。漢字、ひらがな、カタカナ、すべての文字が含まれています。
+
+Este es un texto de ejemplo en español. Utiliza caracteres UTF-8 para incluir letras acentuadas y caracteres especiales como: á, é, í, ó, ú, ñ, ¿, ¡.
+
+Ceci est un exemple de texte en français. Il utilise des caractères UTF-8 pour inclure des lettres accentuées telles que: é, è, à, ç, œ, û.
+
+Dies ist ein Beispieltext auf Deutsch. Es verwendet UTF-8-Zeichen, um Umlaute wie ä, ö, ü und ß zu enthalten.
+
+Questo è un esempio di testo in italiano. Utilizza caratteri UTF-8 per includere lettere accentate come: à, è, ì, ò, ù.
+
+Это пример текста на русском языке. Он использует символы UTF-8, чтобы включить буквы с акцентами, такие как: ё, й, ц, э, ф, ю.
+
+这是一个中文示例文本。它使用UTF-8字符包含汉字和特殊字符。
+
+هذا هو مثال على نص باللغة العربية. يستخدم أحرف UTF-8 لتضمين الحروف المشددة مثل: ة, ذ, ض, ص, ظ, ع.
+
+Αυτό είναι ένα παράδειγμα κειμένου στα ελληνικά. Χρησιμοποιεί χαρακτήρες UTF-8 για να περιλάβει τα ελληνικά γράμματα όπως: α, β, γ, δ, ε, ζ.
+
+Энэ нь Монгол текстийн жишээ юм. Энэ нь UTF-8 кодтой бичигдсэн ба Монгол цагаан толгойн үсгүүдийг агуулж байна.
+
+これでUTF-8エンコーディングのテストができるはずです。異なる言語や文字が含まれているので、UTF-8対応の環境では正しく表示されるでしょう。
