@@ -10,6 +10,7 @@ import (
 )
 
 var tests = []string{
+	"testdata/ascii_1mib_prefix_unicode.txt",
 	"testdata/ascii_1b.txt",
 	"testdata/ascii_15b.txt",
 	"testdata/ascii_16b.txt",
@@ -18,7 +19,6 @@ var tests = []string{
 	"testdata/wiki_ukr.html",
 	"testdata/wiki_jap.html",
 	"testdata/ascii_1mib.txt",
-	"testdata/ascii_1mib_prefix_unicode.txt",
 }
 
 var GB bool
