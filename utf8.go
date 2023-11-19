@@ -475,33 +475,91 @@ func RuneStart(b byte) bool { return b&0xC0 != 0x80 }
 
 // Valid reports whether p consists entirely of valid UTF-8-encoded runes.
 func Valid(p []byte) bool {
-	if len(p) == 1 {
-		// Fast path for single-byte inputs
-		return p[0] < RuneSelf
-	}
 	// This optimization avoids the need to recompute the capacity
 	// when generating code for p[8:], bringing it to parity with
 	// ValidString, which was 20% faster on long ASCII strings.
 	p = p[:len(p):len(p)]
-MAIN_LOOP:
-	for {
-		// Fast path. Check for and skip 16 bytes of ASCII characters per iteration.
-		for len(p) > 15 {
+
+	if len(p) == 1 {
+		// Fast path for single-byte inputs.
+		return p[0] < RuneSelf
+	}
+
+	if len(p) < 16 {
+		// Fast path for inputs under 16 bytes.
+		if len(p) >= 8 {
+			// Skip over first 8 ASCII bytes if possible.
+
 			// Combining two 32 bit loads allows the same code to be used
 			// for 32 and 64 bit platforms.
 			// The compiler can generate a 32bit load for first32 and second32
 			// on many platforms. See test/codegen/memcombine.go.
 			first32 := uint32(p[0]) | uint32(p[1])<<8 | uint32(p[2])<<16 | uint32(p[3])<<24
 			second32 := uint32(p[4]) | uint32(p[5])<<8 | uint32(p[6])<<16 | uint32(p[7])<<24
+			if (first32|second32)&0x80808080 == 0 {
+				// No non-ASCII characters in the first 8 bytes.
+				p = p[8:]
+			} else if first32&0x80808080 == 0 {
+				// No non-ASCII characters in the first 4 bytes.
+				p = p[4:]
+			}
+		}
+		n := len(p)
+		for i := 0; i < n; {
+			pi := p[i]
+			if pi < RuneSelf {
+				i++
+				continue
+			}
+			x := first[pi]
+			if x == xx {
+				return false // Illegal starter byte.
+			}
+			size := int(x & 7)
+			if i+size > n {
+				return false // Short or invalid.
+			}
+			accept := acceptRanges[x>>4]
+			if c := p[i+1]; c < accept.lo || accept.hi < c {
+				return false
+			} else if size == 2 {
+				i += 2
+			} else if c := p[i+2]; c < locb || hicb < c {
+				return false
+			} else if size == 3 {
+				i += 3
+			} else if c := p[i+3]; c < locb || hicb < c {
+				return false
+			}
+			i += 4
+		}
+		return true
+	}
+MAIN_LOOP:
+	for {
+		// Fast path. Check for and skip 16 bytes of ASCII characters per iteration.
+		for len(p) > 15 {
+			first32 := uint32(p[0]) | uint32(p[1])<<8 | uint32(p[2])<<16 | uint32(p[3])<<24
+			second32 := uint32(p[4]) | uint32(p[5])<<8 | uint32(p[6])<<16 | uint32(p[7])<<24
 			if (first32|second32)&0x80808080 != 0 {
+				if first32&0x80808080 == 0 {
+					// No non-ASCII characters in the first 4 bytes.
+					p = p[4:]
+				}
 				break // Found a non ASCII byte (>= RuneSelf).
 			}
 			first32 = uint32(p[8]) | uint32(p[9])<<8 | uint32(p[10])<<16 | uint32(p[11])<<24
 			second32 = uint32(p[12]) | uint32(p[13])<<8 | uint32(p[14])<<16 | uint32(p[15])<<24
 			if (first32|second32)&0x80808080 != 0 {
+				if first32&0x80808080 == 0 {
+					// No non-ASCII characters in the first 12 bytes.
+					p = p[12:]
+					break
+				}
 				p = p[8:]
-				break // Found a non ASCII byte (>= RuneSelf).
+				break // Found a non ASCII byte (>= RuneSelf) after first 8 bytes.
 			}
+			// No non-ASCII characters in the first 16 bytes.
 			p = p[16:]
 		}
 		n := len(p)

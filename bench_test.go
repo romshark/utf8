@@ -10,14 +10,15 @@ import (
 )
 
 var tests = []string{
-	"testdata/ascii_1mib_prefix_unicode.txt",
 	"testdata/ascii_1b.txt",
+	"testdata/ascii_15b.txt",
 	"testdata/ascii_16b.txt",
 	"testdata/ascii_2k.txt",
 	"testdata/unicode_2k.txt",
 	"testdata/wiki_ukr.html",
 	"testdata/wiki_jap.html",
 	"testdata/ascii_1mib.txt",
+	"testdata/ascii_1mib_prefix_unicode.txt",
 }
 
 var GB bool
