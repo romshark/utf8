@@ -10,15 +10,24 @@ import (
 )
 
 var tests = []string{
-	"testdata/ascii_1mib_prefix_unicode.txt",
+	"testdata/unicode_r64_256b.txt",
+	"testdata/unicode_r1_2b.txt",
+	"testdata/unicode_r1_3b.txt",
+	"testdata/unicode_r1_4b.txt",
+	"testdata/unicode_r2_6b.txt",
+	"testdata/unicode_2k.txt",
+	"testdata/ascii_1mib_prefix_r1_3b.txt",
 	"testdata/ascii_1b.txt",
 	"testdata/ascii_15b.txt",
 	"testdata/ascii_16b.txt",
+	"testdata/ascii_8b.txt",
+	"testdata/ascii_31b.txt",
+	"testdata/tweet_uni_223b.txt",
 	"testdata/ascii_2k.txt",
-	"testdata/unicode_2k.txt",
 	"testdata/wiki_ukr.html",
 	"testdata/wiki_jap.html",
 	"testdata/ascii_1mib.txt",
+	"testdata/worst_case_1k.txt",
 }
 
 var GB bool

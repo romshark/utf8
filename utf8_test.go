@@ -9,7 +9,8 @@ import (
 	"strings"
 	"testing"
 	"unicode"
-	. "unicode/utf8"
+
+	. "github.com/romshark/utf8"
 )
 
 // Validate the constants redefined from unicode.
@@ -469,6 +470,8 @@ type ValidTest struct {
 	out bool
 }
 
+const ascii32 = "0123456789abcdef0123456789abcdef"
+
 var validTests = []ValidTest{
 	{"", true},
 	{"a", true},
@@ -477,17 +480,64 @@ var validTests = []ValidTest{
 	{"ЖЖ", true},
 	{"брэд-ЛГТМ", true},
 	{"☺☻☹", true},
-	{"aa\xe2", false},
-	{string([]byte{66, 250}), false},
-	{string([]byte{66, 250, 67}), false},
+
+	{string("🙂") + ascii32, true},             // UTF-8 char in first quartet
+	{string("0123🙂") + ascii32, true},         // UTF-8 char in second quartet
+	{string("01230123🙂") + ascii32, true},     // UTF-8 char in third quartet
+	{string("012301230123🙂") + ascii32, true}, // UTF-8 char in fourth quartet
+
 	{"a\uFFFDb", true},
-	{string("\xF4\x8F\xBF\xBF"), true},      // U+10FFFF
-	{string("\xF4\x90\x80\x80"), false},     // U+10FFFF+1; out of range
-	{string("\xF7\xBF\xBF\xBF"), false},     // 0x1FFFFF; out of range
-	{string("\xFB\xBF\xBF\xBF\xBF"), false}, // 0x3FFFFFF; out of range
-	{string("\xc0\x80"), false},             // U+0000 encoded in two bytes: incorrect
-	{string("\xed\xa0\x80"), false},         // U+D800 high surrogate (sic)
-	{string("\xed\xbf\xbf"), false},         // U+DFFF low surrogate (sic)
+	{string("\xF4\x8F\xBF\xBF"), true}, // U+10FFFF
+
+	{"aa\xe2", false},
+	{"aa\xe2" + ascii32, false},
+
+	{string([]byte{66, 250}), false},
+	{string([]byte{66, 250}) + ascii32, false},
+
+	{string([]byte{66, 250, 67}), false},
+	{string([]byte{66, 250, 67}) + ascii32, false},
+
+	// U+10FFFF+1; out of range
+	{string("\xF4\x90\x80\x80"), false},
+	{string("\xF4\x90\x80\x80") + ascii32, false},
+
+	// 0x1FFFFF; out of range
+	{string("\xF7\xBF\xBF\xBF"), false},
+	{string("\xF7\xBF\xBF\xBF") + ascii32, false},
+
+	// 0x3FFFFFF; out of range
+	{string("\xFB\xBF\xBF\xBF\xBF"), false},
+	{string("\xFB\xBF\xBF\xBF\xBF") + ascii32, false},
+
+	// U+0000 encoded in two bytes: incorrect
+	{string("\xc0\x80"), false},
+	{string("\xc0\x80") + ascii32, false},
+
+	// U+D800 high surrogate (sic)
+	{string("\xed\xa0\x80"), false},
+	{string("\xed\xa0\x80") + ascii32, false},
+
+	// U+DFFF low surrogate (sic)
+	{string("\xed\xbf\xbf"), false},
+	{string("\xed\xbf\xbf") + ascii32, false},
+
+	// Illegal starter byte
+	{string("\xa0"), false},
+	{string("\xa0") + ascii32, false},
+
+	// 0xF0 starts a 4-byte sequence but
+	// 0x7F is outside the valid range for a continuation byte.
+	{string("\xF0\x91\x7F\x91"), false},
+	{string("\xF0\x91\x7F\x91") + ascii32, false},
+
+	// 0xF0 starts a 4-byte sequence but
+	// 0x7F is outside the valid range for a continuation byte.
+	{string("\xF0\x91\x91\x7F"), false},
+	{string("\xF0\x91\x91\x7F") + ascii32, false},
+
+	// 0xF0 starts a 4-byte sequence but the string is too short
+	{ascii32[:30] + string("🙂\xF0\x91\x91"), false},
 }
 
 func TestValid(t *testing.T) {
